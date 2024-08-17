@@ -1,9 +1,14 @@
 <?php
 /**
  * Plugin Name: Custom Hamburger Menu
- * Description: A plugin that adds a menu with desktop and mobile behavior using a shortcode.
- * Version: 1.0
- * Author: Shobhit Kumar PRabhakar
+ * Description: A plugin that adds a responsive hamburger menu with customizable options.
+ * Version: 1.0.2
+ * Author: Shobhit Kumar Prabhakar
+ * Author URI: https://shobhit.net
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: custom-hamburger-menu
+ * Domain Path: /languages
  */
 
 // Enqueue necessary styles and scripts
@@ -13,7 +18,7 @@ function chm_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'chm_enqueue_scripts');
 
-// Shortcode to display the custom menu
+// Shortcode to display the custom hamburger menu
 function chm_menu_shortcode($atts) {
     $menu = wp_nav_menu(array(
         'theme_location' => 'chm-menu',
@@ -41,16 +46,14 @@ function chm_menu_shortcode($atts) {
                     <rect y="4" width="24" height="2" fill="#000"/>
                     <rect y="11" width="24" height="2" fill="#000"/>
                     <rect y="18" width="24" height="2" fill="#000"/>
-                </svg>
-            </button>
+                </svg>            </button>
         </div>
         <div class="chm-hamburger-content">
             <button class="chm-close-icon" aria-label="Close Menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <line x1="18" y1="6" x2="6" y2="18" stroke="white" stroke-width="2"/>
                     <line x1="6" y1="6" x2="18" y2="18" stroke="white" stroke-width="2"/>
-                </svg>
-            </button>
+                </svg>            </button>
             <?php echo $hamburger_menu; ?>
         </div>
     </div>
@@ -58,6 +61,8 @@ function chm_menu_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('custom_hamburger_menu', 'chm_menu_shortcode');
+
+
 
 // Register a custom menu location
 function chm_register_menus() {
@@ -98,6 +103,8 @@ function chm_settings_page() {
 }
 
 
+
+
 function chm_settings_init() {
     // Register settings
     register_setting('chm-settings-group', 'chm_menu_item_color');
@@ -110,8 +117,11 @@ function chm_settings_init() {
     register_setting('chm-settings-group', 'chm_hamburger_font_size');
     register_setting('chm-settings-group', 'chm_background_color');
     register_setting('chm-settings-group', 'chm_background_image');
+    register_setting('chm-settings-group', 'chm_mainmenu_submenu_background_color');
+    register_setting('chm-settings-group', 'chm_mainmenu_submenu_text_color');
+    register_setting('chm-settings-group', 'chm_hamburger_submenu_background_color');
+    register_setting('chm-settings-group', 'chm_hamburger_submenu_text_color');
 
-    // Add settings section
     add_settings_section(
         'chm_settings_section', 
         'Customize Menu Appearance', 
@@ -119,7 +129,6 @@ function chm_settings_init() {
         'chm-settings'
     );
 
-    // Add settings fields
     add_settings_field(
         'chm_menu_item_color', 
         'Menu Item Text Color', 
@@ -199,10 +208,51 @@ function chm_settings_init() {
         'chm-settings', 
         'chm_settings_section'
     );
+
+    add_settings_field(
+        'chm_mainmenu_submenu_background_color', 
+        'Main Menu Submenu Background Color', 
+        'chm_mainmenu_submenu_background_color_callback', 
+        'chm-settings', 
+        'chm_settings_section'
+    );
+
+    add_settings_field(
+        'chm_mainmenu_submenu_text_color', 
+        'Main Menu Submenu Text Color', 
+        'chm_mainmenu_submenu_text_color_callback', 
+        'chm-settings', 
+        'chm_settings_section'
+    );
+
+    add_settings_field(
+        'chm_hamburger_submenu_background_color', 
+        'Hamburger Menu Submenu Background Color', 
+        'chm_hamburger_submenu_background_color_callback', 
+        'chm-settings', 
+        'chm_settings_section'
+    );
+
+    add_settings_field(
+        'chm_hamburger_submenu_text_color', 
+        'Hamburger Menu Submenu Text Color', 
+        'chm_hamburger_submenu_text_color_callback', 
+        'chm-settings', 
+        'chm_settings_section'
+    );
+
+    // Restore Defaults Button
+    add_settings_field(
+        'chm_restore_defaults', 
+        'Restore Defaults', 
+        'chm_restore_defaults_callback', 
+        'chm-settings', 
+        'chm_settings_section'
+    );
 }
 add_action('admin_init', 'chm_settings_init');
 
-// Callback functions for new fields
+// Callback functions for the new fields
 function chm_menu_item_font_weight_callback() {
     $font_weight = get_option('chm_menu_item_font_weight', '400');
     echo '<input type="number" name="chm_menu_item_font_weight" value="' . esc_attr($font_weight) . '" class="small-text" min="100" max="900" step="100" />';
@@ -222,6 +272,42 @@ function chm_hamburger_font_size_callback() {
     $font_size = get_option('chm_hamburger_font_size', '16');
     echo '<input type="number" name="chm_hamburger_font_size" value="' . esc_attr($font_size) . '" class="small-text" min="10" max="40" step="1" /> px';
 }
+
+function chm_background_image_callback() {
+    $image = get_option('chm_background_image');
+    echo '<input type="text" name="chm_background_image" value="' . esc_attr($image) . '" class="regular-text" />';
+    echo '<button class="upload_image_button button">Upload Image</button>';
+}
+
+function chm_restore_defaults_callback() {
+    echo '<button type="button" class="button" id="chm-restore-defaults">Restore Defaults</button>';
+}
+add_action('admin_init', 'chm_settings_init');
+
+// Callback functions for the new fields
+function chm_mainmenu_submenu_background_color_callback() {
+    $color = get_option('chm_mainmenu_submenu_background_color', 'rgba(255, 255, 255, 0.9)');
+    echo '<input type="text" name="chm_mainmenu_submenu_background_color" value="' . esc_attr($color) . '" class="my-color-field" data-default-color="rgba(255, 255, 255, 0.9)" />';
+}
+
+function chm_mainmenu_submenu_text_color_callback() {
+    $color = get_option('chm_mainmenu_submenu_text_color', '#000000');
+    echo '<input type="text" name="chm_mainmenu_submenu_text_color" value="' . esc_attr($color) . '" class="my-color-field" data-default-color="#000000" />';
+}
+
+function chm_hamburger_submenu_background_color_callback() {
+    $color = get_option('chm_hamburger_submenu_background_color', 'rgba(0, 0, 0, 0.5)');
+    echo '<input type="text" name="chm_hamburger_submenu_background_color" value="' . esc_attr($color) . '" class="my-color-field" data-default-color="rgba(0, 0, 0, 0.5)" />';
+}
+
+function chm_hamburger_submenu_text_color_callback() {
+    $color = get_option('chm_hamburger_submenu_text_color', '#ffffff');
+    echo '<input type="text" name="chm_hamburger_submenu_text_color" value="' . esc_attr($color) . '" class="my-color-field" data-default-color="#ffffff" />';
+}
+
+add_action('admin_init', 'chm_settings_init');
+
+
 
 add_action('admin_init', 'chm_settings_init');
 
@@ -253,9 +339,6 @@ function chm_hamburger_hover_color_callback() {
 
 
 
-add_action('admin_init', 'chm_settings_init');
-
-
 function chm_text_color_callback() {
     $text_color = get_option('chm_text_color');
     echo '<input type="text" name="chm_text_color" value="' . esc_attr($text_color) . '" class="my-color-field" data-default-color="#000000" />';
@@ -266,11 +349,7 @@ function chm_background_color_callback() {
     echo '<input type="text" name="chm_background_color" value="' . esc_attr($background_color) . '" class="my-color-field" data-default-color="#333333" />';
 }
 
-function chm_background_image_callback() {
-    $background_image = get_option('chm_background_image');
-    echo '<input type="text" name="chm_background_image" value="' . esc_attr($background_image) . '" class="regular-text" />';
-    echo '<button class="upload_image_button button">Upload Image</button>';
-}
+
 function chm_enqueue_admin_scripts($hook) {
     if ('toplevel_page_chm-settings' !== $hook) {
         return;
@@ -288,13 +367,26 @@ function chm_dynamic_styles() {
     $menu_item_color = get_option('chm_menu_item_color', '#000000');
     $menu_item_hover_color = get_option('chm_menu_item_hover_color', '#000000');
     $menu_item_font_weight = get_option('chm_menu_item_font_weight', '400');
-    $menu_item_font_size = get_option('chm_menu_item_font_size', '16px');
+    $menu_item_font_size = get_option('chm_menu_item_font_size', '16'); // Default size in px
     $hamburger_text_color = get_option('chm_hamburger_text_color', '#ffffff');
     $hamburger_hover_color = get_option('chm_hamburger_hover_color', '#cccccc');
     $hamburger_font_weight = get_option('chm_hamburger_font_weight', '400');
-    $hamburger_font_size = get_option('chm_hamburger_font_size', '16px');
-    $background_color = get_option('chm_background_color', '#333333');
+    $hamburger_font_size = get_option('chm_hamburger_font_size', '16'); // Default size in px
+    $background_color = get_option('chm_background_color', 'rgba(51, 51, 51, 0.9)');
     $background_image = get_option('chm_background_image', '');
+    $mainmenu_submenu_background_color = get_option('chm_mainmenu_submenu_background_color', '#ffffff');
+    $mainmenu_submenu_text_color = get_option('chm_mainmenu_submenu_text_color', '#000000');
+    $hamburger_submenu_background_color = get_option('chm_hamburger_submenu_background_color', 'rgba(0, 0, 0, 0.5)');
+    $hamburger_submenu_text_color = get_option('chm_hamburger_submenu_text_color', '#ffffff');
+
+    // Ensure px is added to the font size if not already included
+    if (is_numeric($menu_item_font_size)) {
+        $menu_item_font_size .= 'px';
+    }
+
+    if (is_numeric($hamburger_font_size)) {
+        $hamburger_font_size .= 'px';
+    }
 
     $custom_css = "
         .chm-main-menu a {
@@ -304,6 +396,12 @@ function chm_dynamic_styles() {
         }
         .chm-main-menu a:hover {
             color: {$menu_item_hover_color};
+        }
+        .chm-main-menu li ul {
+            background-color: {$mainmenu_submenu_background_color};
+        }
+        .chm-main-menu li ul a {
+            color: {$mainmenu_submenu_text_color};
         }
         .chm-hamburger-content a {
             color: {$hamburger_text_color};
@@ -318,8 +416,24 @@ function chm_dynamic_styles() {
             background-image: url('{$background_image}');
             background-size: cover;
             background-repeat: no-repeat;
+            overflow-y: auto;
+        }
+        .chm-hamburger-content ul ul {
+            background-color: {$hamburger_submenu_background_color};
+        }
+        .chm-hamburger-content ul ul a {
+            color: {$hamburger_submenu_text_color};
         }
     ";
     wp_add_inline_style('chm-style', $custom_css);
 }
 add_action('wp_enqueue_scripts', 'chm_dynamic_styles');
+
+function chm_add_settings_link($links) {
+    // Add a link to the settings page
+    $settings_link = '<a href="admin.php?page=chm-settings">Settings</a>';
+    array_unshift($links, $settings_link); // Add it to the beginning of the list
+    return $links;
+}
+
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'chm_add_settings_link');
