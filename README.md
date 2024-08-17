@@ -1,4 +1,5 @@
 === Custom Hamburger Menu ===
+
 Contributors: Shobhit Kumar Prabhakar
 Tags: menu, hamburger menu, responsive menu, custom menu, wordpress menu
 Requires at least: 5.0
