@@ -1,11 +1,17 @@
 === Custom Hamburger Menu ===
 
 Contributors: Shobhit Kumar Prabhakar
+
 Tags: menu, hamburger menu, responsive menu, custom menu, wordpress menu
+
 Requires at least: 5.0
+
 Tested up to: 6.3
+
 Stable tag: 1.0.0
+
 License: GPLv3
+
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 A customizable responsive hamburger menu plugin for WordPress with options to set text colors, background colors, and more.
